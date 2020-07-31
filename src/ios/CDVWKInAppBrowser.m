@@ -295,6 +295,19 @@ static CDVWKInAppBrowser* instance = nil;
 
     // Run later to avoid the "took a long time" log message.
     dispatch_async(dispatch_get_main_queue(), ^{
+
+        UIColor *color = [UIColor colorWithRed:3/255.0 green:147/255.0 blue:218/255.0 alpha:1.0];
+
+        if (IsAtLeastiOSVersion(@"13.0")) {
+            UIView *statusBar = [[UIView alloc]initWithFrame:[UIApplication sharedApplication].keyWindow.windowScene.statusBarManager.statusBarFrame] ;
+            statusBar.backgroundColor = color;
+            [[UIApplication sharedApplication].keyWindow addSubview:statusBar];
+        } else {
+            UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
+            if ([statusBar respondsToSelector:@selector(setBackgroundColor:)]) {
+                statusBar.backgroundColor = color;
+            }
+        }
         if (weakSelf.inAppBrowserViewController != nil) {
             float osVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
             __strong __typeof(weakSelf) strongSelf = weakSelf;
@@ -324,6 +337,22 @@ static CDVWKInAppBrowser* instance = nil;
     // https://stackoverflow.com/questions/4544489/how-to-remove-a-uiwindow
     self->tmpWindow.hidden = YES;
     self->tmpWindow = nil;
+
+    UIColor *color = [UIColor whiteColor];
+    if (IsAtLeastiOSVersion(@"13.0")) {
+        if (@available(iOS 13.0, *)) {
+            UIView *statusBar = [[UIView alloc]initWithFrame:[UIApplication sharedApplication].keyWindow.windowScene.statusBarManager.statusBarFrame] ;
+            statusBar.backgroundColor = color;
+            [[UIApplication sharedApplication].keyWindow addSubview:statusBar];
+        } else {
+            // Fallback on earlier versions
+        }
+    } else {
+        UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
+        if ([statusBar respondsToSelector:@selector(setBackgroundColor:)]) {
+            statusBar.backgroundColor = color;
+        }
+    }
 
     if (self.inAppBrowserViewController == nil) {
         NSLog(@"Tried to hide IAB after it was closed.");
